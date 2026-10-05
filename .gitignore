@@ -1,0 +1,64 @@
+# =========================
+# Environment / Secrets
+# =========================
+.env
+
+# =========================
+# IntelliJ IDEA
+# =========================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# =========================
+# Maven / Java
+# =========================
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# =========================
+# Frontend
+# =========================
+frontend/node_modules/
+frontend/dist/
+
+# =========================
+# Eclipse
+# =========================
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+
+# =========================
+# NetBeans
+# =========================
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# Kotlin
+# =========================
+.kotlin
+
+# =========================
+# Operating System
+# =========================
+.DS_Store
+
+# =========================
+# Logs
+# =========================
+*.log

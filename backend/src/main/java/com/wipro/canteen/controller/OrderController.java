@@ -44,6 +44,21 @@ public class OrderController {
         );
     }
 
+    // Confirm order endpoint
+    @PutMapping("/{orderId}/confirm")
+    public ResponseEntity<Order> confirmOrder(@PathVariable Long orderId) {
+        Order confirmed = orderService.confirmOrder(orderId);
+        return ResponseEntity.ok(confirmed);
+    }
+
+    // Edit order endpoint
+    @PutMapping("/{orderId}/edit")
+    public ResponseEntity<Order> editOrder(@PathVariable Long orderId,
+                                           @RequestBody OrderRequest request) {
+        Order edited = orderService.editOrder(orderId, request);
+        return ResponseEntity.ok(edited);
+    }
+
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
 

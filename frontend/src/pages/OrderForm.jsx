@@ -86,7 +86,8 @@ function OrderForm() {
                 quantity: Number(quantity),
             };
 
-            await api.post("/orders", orderData);
+            // Use the stored‑procedure endpoint so the order is created with status = PLACED
+            await api.post("/orders/place", orderData);
 
             setMessage("Order placed successfully.");
 

@@ -61,7 +61,6 @@ public class OrderService {
         order.setStudent(student);
         order.setOrderDate(LocalDateTime.now());
         order.setTotalAmount(amount);
-        order.setStatus("CONFIRMED");
 
         Order savedOrder = orderRepository.save(order);
 
@@ -103,5 +102,59 @@ public class OrderService {
                 foodId,
                 quantity
         );
+    }
+
+    /**
+     * Confirm an order by setting its status to CONFIRMED.
+     * Only orders with status PLACED can be confirmed.
+     */
+    @Transactional
+    public Order confirmOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!"PLACED".equalsIgnoreCase(order.getStatus())) {
+            throw new RuntimeException("Only PLACED orders can be confirmed");
+        }
+        order.setStatus("CONFIRMED");
+        return orderRepository.save(order);
+    }
+
+    /**
+     * Edit an existing PLACED order. Allows changing food item and quantity.
+     * Adjusts food availability accordingly and recalculates total amount.
+     */
+    @Transactional
+    public Order editOrder(Long orderId, OrderRequest request) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        if (!"PLACED".equalsIgnoreCase(order.getStatus())) {
+            throw new RuntimeException("Only PLACED orders can be edited");
+        }
+        // Assuming each order has a single OrderItem for simplicity
+        OrderItem orderItem = order.getOrderItems().stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Order items not found"));
+        // Restore stock of previous food item
+        FoodItem oldFood = orderItem.getFoodItem();
+        int oldQty = orderItem.getQuantity();
+        oldFood.setAvailableQuantity(oldFood.getAvailableQuantity() + oldQty);
+        foodItemRepository.save(oldFood);
+        // Fetch new food item
+        FoodItem newFood = foodItemRepository.findById(request.getFoodId())
+                .orElseThrow(() -> new RuntimeException("Food item not found"));
+        if (newFood.getAvailableQuantity() < request.getQuantity()) {
+            throw new RuntimeException("Insufficient food availability");
+        }
+        // Deduct new quantity
+        newFood.setAvailableQuantity(newFood.getAvailableQuantity() - request.getQuantity());
+        foodItemRepository.save(newFood);
+        // Update order item
+        orderItem.setFoodItem(newFood);
+        orderItem.setQuantity(request.getQuantity());
+        orderItem.setPrice(newFood.getPrice());
+        orderItemRepository.save(orderItem);
+        // Recalculate total amount
+        BigDecimal newAmount = newFood.getPrice().multiply(BigDecimal.valueOf(request.getQuantity()));
+        order.setTotalAmount(newAmount);
+        return orderRepository.save(order);
     }
 }

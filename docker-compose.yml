@@ -1,0 +1,38 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: canteen-mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: canteen_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "3308:3306"
+
+    volumes:
+      - canteen_mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: canteen-backend
+    restart: unless-stopped
+
+    depends_on:
+      - mysql
+
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/canteen_db
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    ports:
+      - "8085:8085"
+
+
+volumes:
+  canteen_mysql_data:
